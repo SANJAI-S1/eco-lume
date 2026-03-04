@@ -6,6 +6,8 @@ pipeline {
         ACCOUNT_ID = "245324547477"
         IMAGE_NAME = "245324547477.dkr.ecr.us-east-1.amazonaws.com/eco-lume"
         REGISTRY = "https://245324547477.dkr.ecr.us-east-1.amazonaws.com"
+        CLUSTER_NAME = "eco-cluster"
+        SERVICE_NAME = "eco-sv"
     }
 
     stages {
@@ -34,5 +36,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to ECS') {
+            steps {
+                withAWS(credentials: 'awsk', region: 'us-east-1') {
+                    sh """
+                    aws ecs update-service \
+                        --cluster ${CLUSTER_NAME} \
+                        --service ${SERVICE_NAME} \
+                        --force-new-deployment \
+                        --region ${AWS_REGION}
+                    """
+                }
+            }
+        }
     }
-}
+}}
